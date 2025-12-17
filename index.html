@@ -180,8 +180,18 @@
                 <div id="about-result-section" class="pt-4 space-y-3">
                     <h4 class="text-lg font-bold uppercase border-b border-gray-700 pb-1">About This Result</h4>
                     <p id="result-interpretation" class="text-sm text-gray-300"></p>
+                    
+                    <!-- NEW: Support and Guidance Section -->
+                    <div id="guidance-section" class="pt-3">
+                        <!-- COLOR CHANGE APPLIED HERE: text-yellow-400 changed to text-white -->
+                        <h4 class="text-lg font-bold uppercase border-b border-gray-700 pb-1 text-white">Support and Guidance</h4>
+                        <ul id="guidance-list" class="space-y-2 text-sm text-gray-300 list-disc list-inside ml-2">
+                            <!-- Guidance items populated by JS -->
+                        </ul>
+                    </div>
+                    <!-- END NEW SECTION -->
+
                 </div>
-                <!-- END NEW SECTION -->
 
                 <!-- Simplified Analysis/Disclaimer Message -->
                 <div id="bf-analysis" class="mt-4 pt-4 border-t border-gray-700 text-sm text-gray-400">
@@ -529,6 +539,47 @@
                 // Use strong tags for visual emphasis
                 return interpretation.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
             }
+            
+            /**
+             * Generates HTML list items with simple guidance based on the BF category.
+             * @param {string} category The derived BF category string
+             * @returns {string} HTML string of <li> elements
+             */
+            function generateGuidance(category) {
+                let guidanceItems = [];
+
+                // Common Guidance - MODIFIED FOR FLEXIBILITY
+                guidanceItems.push('Regularly monitor your measurements (e.g., every 1-4 weeks) at the same time and conditions to track long-term trends accurately.');
+                guidanceItems.push('Focus on a balanced diet rich in whole foods, lean protein, and fiber for satiety and muscle maintenance.');
+                guidanceItems.push('Ensure adequate sleep (7-9 hours) as it significantly impacts hormones related to recovery and fat storage.');
+
+                // Category Specific Guidance - MODIFIED GOALS
+                if (category === 'Essential Fat') {
+                    guidanceItems.push('<strong>Goal: Maintenance/Small Increase.</strong> As this is the minimum physiological fat level, focus on nutrient-dense food and potentially a small, controlled increase in body fat for long-term health and hormonal balance.');
+                    guidanceItems.push('Ensure sufficient caloric intake to match your high activity level and fuel training.');
+
+                } else if (category === 'Athletic') {
+                    guidanceItems.push('<strong>Goal: Maintenance/Performance Improvement.</strong> Focus on optimizing training-specific nutrition (timing protein/carbs) to maintain low body fat while maximizing lean mass and recovery.');
+                    guidanceItems.push('Prioritize post-workout nutrition (protein and carbs) to optimize muscle recovery and growth.');
+
+                } else if (category === 'Fitness' || category === 'Acceptable') {
+                    guidanceItems.push('<strong>Goal: Maintenance/Improvement.</strong> If aiming for a lower body fat percentage, focus on a sustainable, small caloric deficit alongside robust training.');
+                    // MODIFIED LINE: Changed 3-4 sessions to 2-4 sessions.
+                    guidanceItems.push('Incorporate resistance training 2-4 times per week to preserve and build Lean Body Mass, which boosts metabolism.');
+                    guidanceItems.push('If maintaining, ensure energy intake matches output and prioritize high protein intake to support existing muscle mass.');
+
+                } else if (category === 'High/Obese') {
+                    guidanceItems.push('<strong>Goal: Sustainable Reduction.</strong> Focus on creating a small, consistent caloric deficit (250-500 kcal daily) for gradual, healthy body fat loss.');
+                    // MODIFIED: Resistance training recommendation for high/obese category to include beginner focus, compound movements, and safety.
+                    guidanceItems.push('<strong>Resistance Training Focus (1-3x/week):</strong> Start with beginner-friendly sessions focused on <strong>full-body compound movements</strong> (like squats, presses, and rows). Prioritize <strong>correct, safe form</strong> and moderate weight/volume to build a solid foundation before increasing intensity.');
+                    // MODIFIED LINE: Changed "Start with low-impact activity..." to "Include low impact activity..."
+                    guidanceItems.push('Include low-impact physical activity (e.g., daily walking) and gradually increase intensity and duration.');
+                    // MODIFICATION APPLIED HERE: Changed 'Consult a Physician or Registered Dietitian' to 'Consult with a professional'
+                    guidanceItems.push('<strong>Consult with a professional</strong> for a safe, personalized weight management plan, especially if you have health concerns.');
+                }
+
+                return guidanceItems.map(item => `<li>${item.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')}</li>`).join('');
+            }
 
 
             // --- Core Calculation Logic ---
@@ -593,8 +644,6 @@
                 
                 if (gender === 'male') {
                     // Note: Math.log10 will throw an error if (waistInches - neckInches) <= 0
-                    // Although the formula breaks down if waist <= neck, we handle the error via clamping later.
-                    // If the difference is non-positive, Math.log10 returns -Infinity or NaN. 
                     const measurementDifference = waistInches - neckInches;
                     if (measurementDifference <= 0) {
                         console.warn("Waist <= Neck, result will be inaccurate and clamped.");
@@ -644,13 +693,17 @@
                 document.getElementById('fat-mass').textContent = `${fmFormatted} ${unitLabel}`;
                 document.getElementById('lean-mass').textContent = `${lbmFormatted} ${unitLabel}`;
                 
-                // Update new Interpretation section
+                // Update Interpretation section
                 const interpretationText = generateInterpretation(gender, bfPercentage, traditionalCategory);
                 document.getElementById('result-interpretation').innerHTML = interpretationText;
                 
+                // Update Guidance section (NEW)
+                const guidanceHtml = generateGuidance(traditionalCategory);
+                document.getElementById('guidance-list').innerHTML = guidanceHtml;
+
                 resultsDiv.classList.remove('hidden');
                 
-                // Store results (no longer needed for copy, but kept as general data)
+                // Store results (as general data)
                 resultsDiv.dataset.bf = bfFormatted;
                 resultsDiv.dataset.fm = fmFormatted;
                 resultsDiv.dataset.lbm = lbmFormatted;
