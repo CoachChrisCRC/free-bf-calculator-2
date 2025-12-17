@@ -1,6 +1,6 @@
-# free-bf-calculator-2
+# free-bf-calculator
 
-Version 2 of the Free BF% Calculator Tool.
+# Free BF% Calculator Tool.
 
 This version includes:
 
