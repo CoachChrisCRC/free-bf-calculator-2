@@ -1,5 +1,3 @@
-# free-bf-calculator
-
 # Free BF% Calculator Tool.
 
 This version includes:
