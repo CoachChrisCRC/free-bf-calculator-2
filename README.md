@@ -8,4 +8,4 @@ This version includes:
 
 • General Support & Guidance tailored to the result
 
-https://coachchriscrc.github.io/free-bf-calculator
+https://coachchriscrc.github.io/free-bf-calculator-v3
