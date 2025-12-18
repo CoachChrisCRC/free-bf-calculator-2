@@ -3,49 +3,89 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Free Bodyfat% Calculator - Coach Chris</title>
+    <title>Free Body Fat Calculator - Coach Chris</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
-        /* Import custom fonts for branding */
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&family=Oswald:wght@400;500;700&display=swap');
         
+        :root {
+            --bg-page: #f3f4f6;
+            --bg-card: #ffffff;
+            --bg-input: #f9fafb;
+            --bg-result: #f9fafb;
+            --bg-toggle: #f3f4f6;
+            --bg-btn-primary: #000000;
+            --bg-btn-unit: #ffffff;
+            --border-color: #e5e7eb;
+            --text-main: #1f2937;
+            --text-heading: #000000;
+            --text-muted: #9ca3af;
+            --text-accent: #6b7280;
+            --btn-text-primary: #ffffff;
+            --btn-text-unit: #000000;
+            --shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+            --toggle-pill-bg: #e5e7eb;
+            --toggle-circle-bg: #ffffff;
+            --toggle-icon-color: #9ca3af;
+            --toggle-active-icon: #1f2937;
+            --modal-overlay: rgba(0, 0, 0, 0.4);
+        }
+
+        [data-theme="dark"] {
+            --bg-page: #0a0a0a;
+            --bg-card: #121212;
+            --bg-input: #1a1a1a;
+            --bg-result: #1a1a1a;
+            --bg-toggle: #1a1a1a;
+            --bg-btn-primary: #ffffff;
+            --bg-btn-unit: #ffffff;
+            --border-color: #262626;
+            --text-main: #ffffff;
+            --text-heading: #ffffff;
+            --text-muted: #525252;
+            --text-accent: #a3a3a3;
+            --btn-text-primary: #000000;
+            --btn-text-unit: #000000;
+            --shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+            --toggle-pill-bg: #1a1a1a;
+            --toggle-circle-bg: #ffffff;
+            --toggle-icon-color: #525252;
+            --toggle-active-icon: #ffffff;
+            --modal-overlay: rgba(0, 0, 0, 0.8);
+        }
+
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #000000; /* Dark Theme Background */
-            color: #ffffff;
+            background-color: var(--bg-page);
+            color: var(--text-main);
+            transition: background-color 0.3s ease, color 0.3s ease;
         }
 
-        .font-brand {
-            font-family: 'Oswald', sans-serif;
+        .font-brand { font-family: 'Oswald', sans-serif; }
+
+        .app-card {
+            background-color: var(--bg-card);
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border-color);
+            transition: all 0.3s ease;
         }
 
-        /* Input styling for the dark theme */
         input, select {
-            background-color: #111111;
-            border: 1px solid #333333;
-            color: #ffffff;
+            background-color: var(--bg-input);
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
             padding: 0.75rem;
-            border-radius: 0.25rem;
-            transition: border-color 0.2s;
+            border-radius: 0.5rem;
+            transition: all 0.2s;
         }
 
         input:focus, select:focus {
             outline: none;
-            border-color: #ffffff;
+            border-color: var(--text-heading);
+            background-color: var(--bg-card);
         }
         
-        /* Hide number input spinners */
-        input[type="number"]::-webkit-outer-spin-button,
-        input[type="number"]::-webkit-inner-spin-button {
-            -webkit-appearance: none;
-            margin: 0;
-        }
-        input[type="number"] {
-            -moz-appearance: textfield;
-        }
-        
-        /* Transition for Hip Input (Conditional visibility for Female) */
         .input-group-transition {
             transition: max-height 0.5s ease-in-out, opacity 0.3s ease-in-out;
             overflow: hidden;
@@ -53,686 +93,550 @@
             opacity: 0;
         }
         .input-group-transition.active {
-            max-height: 150px; /* Sufficient height for content */
+            max-height: 150px;
             opacity: 1;
         }
 
+        .result-box {
+            background-color: var(--bg-result);
+            border: 1px solid var(--border-color);
+        }
+
+        .unit-toggle-bg {
+            background-color: var(--bg-toggle);
+            border: 1px solid var(--border-color);
+        }
+
+        .unit-btn-active {
+            background-color: var(--bg-btn-unit);
+            color: var(--btn-text-unit);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .unit-btn-inactive { color: var(--text-muted); }
+
+        .theme-switch-container {
+            position: relative;
+            width: 44px;
+            height: 22px;
+            background-color: var(--toggle-pill-bg);
+            border-radius: 100px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            align-items: center;
+            padding: 2px;
+            border: 1px solid var(--border-color);
+        }
+
+        .theme-switch-circle {
+            position: absolute;
+            left: 2px;
+            width: 16px;
+            height: 16px;
+            background-color: var(--bg-btn-primary);
+            border-radius: 50%;
+            transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            z-index: 10;
+        }
+
+        [data-theme="dark"] .theme-switch-circle { transform: translateX(22px); }
+
+        .theme-switch-icons {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            padding: 0 3px;
+            z-index: 5;
+            pointer-events: none;
+        }
+
+        .theme-switch-icons i {
+            width: 9px;
+            height: 9px;
+            color: var(--toggle-icon-color);
+            transition: color 0.3s ease;
+        }
+
+        [data-theme="light"] .icon-sun { color: var(--btn-text-primary); }
+        [data-theme="dark"] .icon-moon { color: var(--btn-text-primary); }
+
+        #modal-overlay {
+            background-color: var(--modal-overlay);
+            backdrop-filter: blur(4px);
+            transition: opacity 0.3s ease;
+        }
+        
+        .modal-content {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            transform: scale(0.95);
+            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        
+        #modal-overlay.active .modal-content {
+            transform: scale(1);
+        }
     </style>
 </head>
-<body class="min-h-screen flex flex-col items-center relative">
+<body class="min-h-screen flex flex-col items-center justify-center p-4 py-12" data-theme="light">
 
-    <header class="w-full max-w-md px-6 py-8 flex justify-between items-start">
-        <div class="flex flex-col select-none">
-            <h1 class="font-brand font-bold text-4xl leading-none tracking-wide text-white mb-1">COACH CHRIS</h1>
-            <h2 class="font-brand font-bold text-lg leading-none text-gray-400 mb-[2px]">CIRCULAR ROOTS COACHING</h2>
-            <h3 class="font-brand font-bold text-lg leading-none text-gray-600">TRAIN UNCNVNTNL</h3>
+    <!-- Information Modal -->
+    <div id="modal-overlay" class="fixed inset-0 z-50 flex items-center justify-center p-6 hidden opacity-0 transition-opacity duration-300">
+        <div class="modal-content w-full max-w-sm rounded-3xl p-8 shadow-2xl relative">
+            <button id="close-modal" class="absolute top-4 right-4 p-2 rounded-full hover:bg-gray-100 dark:hover:bg-zinc-800 transition-colors">
+                <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+            <div class="flex flex-col items-center text-center">
+                <div id="modal-icon-container" class="p-4 rounded-2xl mb-4" style="background-color: var(--bg-toggle)">
+                    <i id="modal-icon" data-lucide="info" class="w-8 h-8"></i>
+                </div>
+                <h3 id="modal-title" class="font-brand font-bold text-2xl uppercase mb-3" style="color: var(--text-heading)">Measurement Tip</h3>
+                <p id="modal-text" class="text-sm leading-relaxed" style="color: var(--text-accent)"></p>
+                <button id="modal-confirm" class="w-full mt-8 py-3 font-black uppercase tracking-widest rounded-xl text-xs" style="background-color: var(--bg-btn-primary); color: var(--btn-text-primary)">Got it</button>
+            </div>
         </div>
+    </div>
+
+    <div class="app-card w-full max-w-md rounded-3xl overflow-hidden flex flex-col items-center">
         
-        <!-- Simplified Header Icon -->
-        <button class="text-white pt-1" aria-label="Menu">
-            <i data-lucide="scan" class="w-8 h-8"></i>
-        </button>
-    </header>
+        <header class="w-full px-8 pt-10 pb-6 flex justify-between items-start">
+            <div class="flex flex-col select-none text-left">
+                <h1 class="font-brand font-bold text-4xl leading-none tracking-wide mb-1" style="color: var(--text-heading)">COACH CHRIS</h1>
+                <h2 class="font-brand font-bold text-lg leading-none mb-[2px]" style="color: var(--text-accent)">CIRCULAR ROOTS COACHING</h2>
+                <h3 class="font-brand font-bold text-lg leading-none uppercase" style="color: var(--text-muted)">Train Uncnvntnl</h3>
+            </div>
+            
+            <div class="flex flex-col items-center gap-3">
+                <div class="p-2.5 rounded-xl flex items-center justify-center transition-colors duration-300" style="color: var(--text-heading); background-color: var(--bg-toggle)">
+                    <i data-lucide="ruler" class="w-6 h-6"></i>
+                </div>
+                
+                <div class="flex flex-col items-center gap-1.5">
+                    <span class="text-[9px] font-black uppercase tracking-widest opacity-60" style="color: var(--text-muted)">Theme</span>
+                    <div id="theme-toggle" class="theme-switch-container" aria-label="Toggle Theme">
+                        <div class="theme-switch-circle"></div>
+                        <div class="theme-switch-icons">
+                            <i data-lucide="sun" class="icon-sun"></i>
+                            <i data-lucide="moon" class="icon-moon"></i>
+                        </div>
+                    </div>
+                    <span id="theme-status" class="text-[8px] font-bold uppercase tracking-wider opacity-60" style="color: var(--text-accent)">Light Mode</span>
+                </div>
+            </div>
+        </header>
 
-    <main class="w-full max-w-md px-6 flex-grow pb-12">
-        <div class="w-full p-0 pt-4 overflow-y-auto h-full">
-            <h2 class="font-brand text-4xl uppercase tracking-widest font-bold mb-4 text-center">Free Body Fat Calculator</h2>
-            <p class="text-center text-sm text-gray-400 mb-6">Uses the US Navy Body Fat Formula (Inputs can be Metric or Imperial).</p>
+        <main class="w-full px-8 flex-grow pb-12">
+            <div class="text-center mb-8">
+                <h2 class="text-2xl font-black uppercase tracking-tight" style="color: var(--text-heading)">Free Body Fat Calculator</h2>
+                <p class="text-xs mt-2 leading-relaxed" style="color: var(--text-accent)">
+                    Uses the US Navy Body Fat Formula.<br>Inputs can be Metric or Imperial.
+                </p>
+            </div>
 
-            <!-- Unit Toggle -->
-            <div class="flex justify-center mb-6">
-                <div id="unit-toggle" class="flex p-1 bg-gray-900 rounded-full border border-gray-700">
-                    <button data-unit="metric" class="unit-btn px-4 py-2 text-sm font-bold rounded-full bg-white text-black transition-colors duration-200">Metric (kg, cm)</button>
-                    <button data-unit="imperial" class="unit-btn px-4 py-2 text-sm font-bold rounded-full text-gray-400 hover:text-white transition-colors duration-200">Imperial (lbs, in)</button>
+            <div class="flex justify-center mb-8">
+                <div id="unit-toggle" class="flex p-1 unit-toggle-bg rounded-xl">
+                    <button id="btn-metric" data-unit="metric" class="unit-btn px-4 py-2 text-xs font-bold rounded-lg transition-all duration-200 unit-btn-active">Metric (kg, cm)</button>
+                    <button id="btn-imperial" data-unit="imperial" class="unit-btn px-4 py-2 text-xs font-bold rounded-lg transition-all duration-200 unit-btn-inactive">Imperial (lbs, ft/in)</button>
                 </div>
             </div>
 
-            <!-- Calculation Form -->
             <form id="calculator-form" class="space-y-4">
-                
                 <label class="block">
-                    <span class="text-sm font-bold block mb-1">Gender</span>
-                    <select id="gender" required class="w-full">
+                    <span class="text-xs font-black uppercase tracking-wider block mb-1.5 ml-1" style="color: var(--text-muted)">Gender</span>
+                    <select id="gender" required class="w-full text-sm font-medium">
                         <option value="">Select Gender</option>
                         <option value="male">Male</option>
                         <option value="female">Female</option>
                     </select>
                 </label>
                 
-                <!-- Weight Input -->
                 <label class="block">
-                    <span class="text-sm font-bold block mb-1" id="label-weight_kg">Weight (kg)</span>
-                    <input type="number" id="weight_kg" min="30" max="300" step="0.1" placeholder="e.g. 80.5 kg" class="w-full" required>
+                    <span class="text-xs font-black uppercase tracking-wider block mb-1.5 ml-1" id="label-weight" style="color: var(--text-muted)">Weight (kg)</span>
+                    <input type="number" id="weight" min="1" max="2200" step="0.1" placeholder="e.g. 80.5" class="w-full text-sm font-medium" required>
                 </label>
 
-                <!-- Height Input -->
-                <label class="block">
-                    <span class="text-sm font-bold block mb-1" id="label-height_cm">Height (cm)</span>
-                    <input type="number" id="height_cm" min="100" max="250" step="0.1" placeholder="e.g. 180 cm" class="w-full" required>
-                </label>
-
-                <!-- Neck Circumference Input -->
-                <div id="neck-input-group">
-                    <div class="flex justify-between items-center mb-1">
-                        <label class="block text-sm font-bold text-white" id="label-neck_cm">Neck Circumference (cm)</label>
-                        <button type="button" id="info-neck-btn" class="text-gray-400 hover:text-white transition duration-150 p-1" aria-label="Information on measuring neck">
-                            <i data-lucide="info" class="w-4 h-4"></i>
-                        </button>
+                <div id="height-container">
+                    <span class="text-xs font-black uppercase tracking-wider block mb-1.5 ml-1" id="label-height" style="color: var(--text-muted)">Height (cm)</span>
+                    <div id="metric-height-box">
+                        <input type="number" id="height_cm" min="10" max="300" step="0.1" placeholder="e.g. 180" class="w-full text-sm font-medium">
                     </div>
-                    <input type="number" id="neck_cm" min="20" max="70" step="0.1" placeholder="e.g. 40.0 cm" class="w-full" required>
+                    <div id="imperial-height-box" class="hidden flex gap-2">
+                        <div class="flex-1">
+                            <input type="number" id="height_ft" min="1" max="9" placeholder="Ft (e.g. 5)" class="w-full text-sm font-medium">
+                        </div>
+                        <div class="flex-1">
+                            <input type="number" id="height_in" min="0" max="11.9" step="0.1" placeholder="In (e.g. 10)" class="w-full text-sm font-medium">
+                        </div>
+                    </div>
                 </div>
 
-                <!-- Waist Circumference Input -->
-                <div id="waist-input-group">
-                    <div class="flex justify-between items-center mb-1">
-                        <label class="block text-sm font-bold text-white" id="label-waist_cm">Waist Circumference (cm)</label>
-                        <button type="button" id="info-waist-btn" class="text-gray-400 hover:text-white transition duration-150 p-1" aria-label="Information on measuring waist">
+                <div id="neck-input-group">
+                    <div class="flex justify-between items-center mb-1.5 ml-1">
+                        <label class="text-xs font-black uppercase tracking-wider" id="label-neck" style="color: var(--text-muted)">Neck (cm)</label>
+                        <button type="button" class="info-btn hover:opacity-80 transition-colors" data-modal="neck">
                             <i data-lucide="info" class="w-4 h-4"></i>
                         </button>
                     </div>
-                    <input type="number" id="waist_cm" min="50" max="150" step="0.1" placeholder="e.g. 90.0 cm" class="w-full" required>
+                    <input type="number" id="neck" min="1" max="300" step="0.1" placeholder="e.g. 40.0" class="w-full text-sm font-medium" required>
+                </div>
+
+                <div id="waist-input-group">
+                    <div class="flex justify-between items-center mb-1.5 ml-1">
+                        <label class="text-xs font-black uppercase tracking-wider" id="label-waist" style="color: var(--text-muted)">Waist (cm)</label>
+                        <button type="button" class="info-btn hover:opacity-80 transition-colors" data-modal="waist">
+                            <i data-lucide="info" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+                    <input type="number" id="waist" min="1" max="400" step="0.1" placeholder="e.g. 90.0" class="w-full text-sm font-medium" required>
                 </div>
                 
-                <!-- Hip Circumference Input (Female Only) -->
                 <div id="hip-input-container" class="input-group-transition">
-                    <label class="block">
-                        <div class="flex justify-between items-center mb-1">
-                            <span class="text-sm font-bold block text-white" id="label-hip_cm">Hip Circumference (cm) - Women Only</span>
-                            <button type="button" id="info-hip-btn" class="text-gray-400 hover:text-white transition duration-150 p-1" aria-label="Information on measuring hip">
-                                <i data-lucide="info" class="w-4 h-4"></i>
-                            </button>
-                        </div>
-                        <input type="number" id="hip_cm" min="60" max="160" step="0.1" placeholder="e.g. 100.0 cm" class="w-full">
-                    </label>
+                    <div class="flex justify-between items-center mb-1.5 ml-1">
+                        <label class="text-xs font-black uppercase tracking-wider" id="label-hip" style="color: var(--text-muted)">Hips (cm)</label>
+                        <button type="button" class="info-btn hover:opacity-80 transition-colors" data-modal="hip">
+                            <i data-lucide="info" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+                    <input type="number" id="hip" min="1" max="400" step="0.1" placeholder="e.g. 100.0" class="w-full text-sm font-medium">
                 </div>
 
-
-                <button type="submit" id="calculate-btn" class="w-full mt-6 py-4 bg-white text-black text-xl font-bold uppercase rounded-sm hover:opacity-80 transition-opacity shadow-lg shadow-white/20">
+                <button type="submit" class="w-full mt-6 py-4 text-base font-black uppercase tracking-widest rounded-xl transition-all shadow-lg active:scale-[0.98]" style="background-color: var(--bg-btn-primary); color: var(--btn-text-primary)">
                     Calculate Bodyfat
                 </button>
             </form>
 
-            <!-- Results Display -->
-            <div id="results" class="hidden mt-8 pt-6 border-t border-gray-700 space-y-4">
-                <h3 class="text-xl font-bold uppercase tracking-wider mb-2 text-center">Estimated Body Composition</h3>
-                
-                <div class="p-4 border border-white rounded-lg text-center bg-[#111111] shadow-xl">
-                    <p class="text-sm uppercase text-gray-400">Body Fat Percentage</p>
-                    <p class="text-5xl font-brand font-bold mt-1 text-white" id="bf-percentage-main">
-                        <span id="bf-percentage">0.0%</span>
-                    </p>
+            <div id="results" class="hidden mt-10 pt-8 space-y-8" style="border-top: 1px solid var(--border-color)">
+                <div class="p-8 rounded-3xl result-box text-center shadow-inner">
+                    <p class="text-[10px] font-black uppercase tracking-widest mb-1" style="color: var(--text-muted)">Your Estimated Body Fat</p>
+                    <p class="text-7xl font-brand font-bold" style="color: var(--text-heading)"><span id="bf-percentage">0.0%</span></p>
+                    <div class="inline-block mt-4 px-4 py-1.5 text-xs font-black uppercase rounded-full" id="bf-traditional-category" style="background-color: var(--bg-btn-primary); color: var(--btn-text-primary)"></div>
                     
-                    <p class="text-lg font-bold mt-1">General Category: <span id="bf-traditional-category" class="text-gray-400"></span></p>
-                </div>
-                
-                <div class="pt-2 space-y-2 text-white">
-                    <div class="flex justify-between items-center py-2 border-b border-gray-700">
-                        <span class="text-sm font-medium text-gray-400">Fat Mass:</span>
-                        <span class="text-base font-bold text-white" id="fat-mass"></span>
-                    </div>
-                    <div class="flex justify-between items-center py-2 border-b border-gray-700">
-                        <span class="text-sm font-medium text-gray-400">Lean Body Mass:</span>
-                        <span class="text-base font-bold text-white" id="lean-mass"></span>
+                    <div class="grid grid-cols-2 gap-4 mt-8 pt-6 border-t" style="border-color: var(--border-color)">
+                        <div class="text-left">
+                            <p class="text-[9px] font-black uppercase tracking-widest opacity-60" style="color: var(--text-muted)">Fat Mass</p>
+                            <p class="text-xl font-bold font-brand" id="fat-mass-display" style="color: var(--text-heading)">0.0 kg</p>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-[9px] font-black uppercase tracking-widest opacity-60" style="color: var(--text-muted)">Lean Body Mass</p>
+                            <p class="text-xl font-bold font-brand" id="lean-mass-display" style="color: var(--text-heading)">0.0 kg</p>
+                        </div>
                     </div>
                 </div>
-                
-                <!-- About This Result Section -->
-                <div id="about-result-section" class="pt-4 space-y-3">
-                    <h4 class="text-lg font-bold uppercase border-b border-gray-700 pb-1">About This Result</h4>
-                    <p id="result-interpretation" class="text-sm text-gray-300"></p>
+
+                <div class="space-y-6">
+                    <div>
+                        <h4 class="text-xs font-black uppercase tracking-widest flex items-center gap-2 mb-3" style="color: var(--text-heading)">
+                            <i data-lucide="info" class="w-4 h-4"></i> About This Result
+                        </h4>
+                        <div class="text-[11px] leading-relaxed p-5 rounded-2xl border bg-opacity-10" style="color: var(--text-accent); border-color: var(--border-color); background-color: var(--bg-toggle)">
+                            <p class="mb-3">
+                                <strong style="color: var(--text-heading)">The US Navy Method:</strong> This estimation is based on the 1984 US Navy Body Fat Formula, which uses anthropometric measurements to calculate body density. While not as precise as a DEXA scan, it provides a reliable, accessible baseline for tracking body composition changes over time.
+                            </p>
+                            <div id="result-interpretation-combined" class="italic">
+                                <!-- Dynamic Interpretation populated by JS -->
+                            </div>
+                        </div>
+                    </div>
                     
-                    <!-- NEW: Support and Guidance Section -->
-                    <div id="guidance-section" class="pt-3">
-                        <!-- COLOR CHANGE APPLIED HERE: text-yellow-400 changed to text-white -->
-                        <h4 class="text-lg font-bold uppercase border-b border-gray-700 pb-1 text-white">Support and Guidance</h4>
-                        <ul id="guidance-list" class="space-y-2 text-sm text-gray-300 list-disc list-inside ml-2">
-                            <!-- Guidance items populated by JS -->
-                        </ul>
+                    <div class="overflow-hidden rounded-xl border" style="border-color: var(--border-color)">
+                        <table class="w-full text-[10px] text-left border-collapse">
+                            <thead>
+                                <tr class="border-b" style="background-color: var(--bg-toggle); border-color: var(--border-color)">
+                                    <th class="p-2 font-black uppercase">Category</th>
+                                    <th class="p-2 font-black uppercase">Men (%)</th>
+                                    <th class="p-2 font-black uppercase">Women (%)</th>
+                                </tr>
+                            </thead>
+                            <tbody style="color: var(--text-main)">
+                                <tr class="border-b" style="border-color: var(--border-color)">
+                                    <td class="p-2 font-bold">Essential Fat</td>
+                                    <td class="p-2">2-5%</td>
+                                    <td class="p-2">10-13%</td>
+                                </tr>
+                                <tr class="border-b" style="border-color: var(--border-color)">
+                                    <td class="p-2 font-bold">Athletic</td>
+                                    <td class="p-2">6-13%</td>
+                                    <td class="p-2">14-20%</td>
+                                </tr>
+                                <tr class="border-b" style="border-color: var(--border-color)">
+                                    <td class="p-2 font-bold">Fitness</td>
+                                    <td class="p-2">14-17%</td>
+                                    <td class="p-2">21-24%</td>
+                                </tr>
+                                <tr class="border-b" style="border-color: var(--border-color)">
+                                    <td class="p-2 font-bold">Acceptable</td>
+                                    <td class="p-2">18-24%</td>
+                                    <td class="p-2">25-31%</td>
+                                </tr>
+                                <tr style="background-color: var(--bg-toggle)">
+                                    <td class="p-2 font-bold">High/Obese</td>
+                                    <td class="p-2">25%+</td>
+                                    <td class="p-2">32%+</td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </div>
-                    <!-- END NEW SECTION -->
+                </div>
 
+                <div class="p-6 rounded-2xl space-y-4" style="background-color: var(--bg-toggle)">
+                    <h4 class="text-xs font-black uppercase tracking-widest flex items-center gap-2" style="color: var(--text-heading)">
+                        <i data-lucide="shield-check" class="w-4 h-4"></i> Support & Guidance
+                    </h4>
+                    
+                    <ul id="guidance-list" class="text-[11px] leading-relaxed space-y-3 list-disc list-inside ml-1" style="color: var(--text-accent)">
+                        <!-- Populated by JS -->
+                    </ul>
+                    
+                    <div class="pt-3 border-t" style="border-color: var(--border-color)">
+                        <p class="text-[10px] font-black uppercase mb-1" style="color: var(--text-muted)">Coach Chris's Advice:</p>
+                        <p class="text-[11px] font-medium" style="color: var(--text-main)">Focus on the 1% wins daily. Use this data as a compass, not a verdict. Progress is a journey of habits, not just numbers.</p>
+                    </div>
                 </div>
 
-                <!-- Simplified Analysis/Disclaimer Message -->
-                <div id="bf-analysis" class="mt-4 pt-4 border-t border-gray-700 text-sm text-gray-400">
-                    <p class="text-center italic">
-                        The accuracy of this result depends entirely on precise measurements. Use this tool for tracking trends, not as a definitive medical analysis.
-                    </p>
-                </div>
-                
-                <div class="mt-6 pt-4 border-t border-gray-700">
-                    <button type="button" id="reset-btn" class="w-full flex items-center justify-center py-3 px-3 text-sm font-bold uppercase tracking-wider text-gray-400 border border-gray-700 rounded-sm hover:opacity-100 transition-opacity">
-                        <i data-lucide="rotate-ccw" class="w-4 h-4 mr-2"></i>
-                        Recalculate
-                    </button>
-                </div>
+                <button type="button" id="reset-btn" class="w-full py-4 text-[10px] font-black uppercase tracking-widest border rounded-xl hover:bg-gray-50 dark:hover:bg-zinc-900 transition-colors" style="color: var(--text-muted); border-color: var(--border-color)">
+                    Start New Calculation
+                </button>
             </div>
-            
-            <p id="bodyfat-error" class="text-center p-3 mt-4 text-sm font-medium rounded-lg text-red-400 bg-red-900/20 border border-red-800 hidden">
-                <!-- Notifications/Errors displayed here -->
-            </p>
-        </div>
-    </main>
-
-    <!-- Footer with Disclaimer -->
-    <footer class="w-full text-center py-6 text-gray-600 text-xs px-4">
-        <p>&copy; 2024 Circular Roots Coaching. All Rights Reserved.</p>
-        <p class="mt-2 text-gray-700 max-w-sm mx-auto">
-            Disclaimer: This calculator provides an estimate based on circumference measurements and the US Navy Body Fat Formula. It is not a substitute for professional medical or body composition analysis. Consult a physician before making major dietary or fitness changes.
-        </p>
-    </footer>
-
-    <!-- Modals for Measurement Info (Neck) -->
-    <div id="neck-info-modal" class="hidden fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title-neck" role="dialog" aria-modal="true">
-        <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-            <div class="fixed inset-0 bg-black bg-opacity-75 transition-opacity" aria-hidden="true" id="modal-backdrop-neck"></div>
-            <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
-            <div class="inline-block align-bottom bg-[#111111] text-white rounded-xl text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full w-full max-w-sm mx-auto">
-                <div class="bg-[#111111] p-6 sm:p-8">
-                    <div class="flex justify-between items-center mb-4 border-b border-gray-700 pb-2">
-                        <h3 class="text-lg font-bold uppercase" id="modal-title-neck">Measure Neck Circumference</h3>
-                        <button type="button" id="modal-close-neck-btn" class="text-gray-400 hover:text-white p-1 transition duration-150 rounded-full">
-                            <i data-lucide="x" class="w-5 h-5"></i>
-                        </button>
-                    </div>
-                    <div class="space-y-4 text-sm text-gray-300">
-                        <p class="font-bold text-white mb-1">Instructions:</p>
-                        <ul class="text-sm list-disc list-inside space-y-2 ml-2">
-                            <li>Stand upright with your head facing forward.</li>
-                            <li>Place the tape measure just below the **larynx (Adam's apple)**, ensuring the tape measure is **level** and not slanted up or down.</li>
-                            <li>Do not pull the tape tight; allow it to rest gently on the skin.</li>
-                            <li>Take the measurement on a **normal exhale**.</li>
-                        </ul>
-                         <div class="p-3 rounded-lg bg-gray-900 text-center text-gray-400 mt-4">
-                            <i data-lucide="scan-face" class="w-10 h-10 mx-auto mb-2 text-white"></i>
-                            <p>Measure at the smallest circumference point, just below the larynx.</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    
-    <!-- Modals for Measurement Info (Waist) -->
-    <div id="waist-info-modal" class="hidden fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title-waist" role="dialog" aria-modal="true">
-        <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-            <div class="fixed inset-0 bg-black bg-opacity-75 transition-opacity" aria-hidden="true" id="modal-backdrop-waist"></div>
-            <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
-            <div class="inline-block align-bottom bg-[#111111] text-white rounded-xl text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full w-full max-w-sm mx-auto">
-                <div class="bg-[#111111] p-6 sm:p-8">
-                    <div class="flex justify-between items-center mb-4 border-b border-gray-700 pb-2">
-                        <h3 class="text-lg font-bold uppercase" id="modal-title-waist">Measure Waist Circumference</h3>
-                        <button type="button" id="modal-close-waist-btn" class="text-gray-400 hover:text-white p-1 transition duration-150 rounded-full">
-                            <i data-lucide="x" class="w-5 h-5"></i>
-                        </button>
-                    </div>
-                    <div class="space-y-4 text-sm text-gray-300">
-                        <p class="font-bold text-white mb-1">Instructions:</p>
-                        <ul class="text-sm list-disc list-inside space-y-2 ml-2">
-                            <li>For **men and women**, measure horizontally around the abdomen at the level of the **navel (belly button)**.</li>
-                            <li>Ensure the tape measure is **level** all the way around the body.</li>
-                            <li>Take the measurement on a **normal exhale**.</li>
-                        </ul>
-                        <div class="p-3 rounded-lg bg-gray-900 text-center text-gray-400 mt-4">
-                            <i data-lucide="ruler" class="w-10 h-10 mx-auto mb-2 text-white"></i>
-                            <p>Measure horizontally at the navel level (belly button).</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    
-    <!-- Modals for Measurement Info (Hip) -->
-    <div id="hip-info-modal" class="hidden fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title-hip" role="dialog" aria-modal="true">
-        <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-            <div class="fixed inset-0 bg-black bg-opacity-75 transition-opacity" aria-hidden="true" id="modal-backdrop-hip"></div>
-            <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
-            <div class="inline-block align-bottom bg-[#111111] text-white rounded-xl text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full w-full max-w-sm mx-auto">
-                <div class="bg-[#111111] p-6 sm:p-8">
-                    <div class="flex justify-between items-center mb-4 border-b border-gray-700 pb-2">
-                        <h3 class="text-lg font-bold uppercase" id="modal-title-hip">Measure Hip Circumference (Female Only)</h3>
-                        <button type="button" id="modal-close-hip-btn" class="text-gray-400 hover:text-white p-1 transition duration-150 rounded-full">
-                            <i data-lucide="x" class="w-5 h-5"></i>
-                        </button>
-                    </div>
-                    <div class="space-y-4 text-sm text-gray-300">
-                        <p class="font-bold text-white mb-1">Instructions:</p>
-                        <ul class="text-sm list-disc list-inside space-y-2 ml-2">
-                            <li>This measurement is **only required for females**.</li>
-                            <li>Measure horizontally around the **widest part of the hips/buttocks**.</li>
-                            <li>Ensure the tape measure is level.</li>
-                        </ul>
-                        <div class="p-3 rounded-lg bg-gray-900 text-center text-gray-400 mt-4">
-                            <i data-lucide="gauge" class="w-10 h-10 mx-auto mb-2 text-white"></i>
-                            <p>Measure horizontally at the widest part of the hips/buttocks.</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+        </main>
     </div>
 
     <script>
-        // Initialize Lucide Icons
         lucide.createIcons();
-
         document.addEventListener('DOMContentLoaded', () => {
             const form = document.getElementById('calculator-form');
             const resultsDiv = document.getElementById('results');
             const genderSelect = document.getElementById('gender');
             const hipInputContainer = document.getElementById('hip-input-container');
-            const errorDiv = document.getElementById('bodyfat-error');
-            const unitToggle = document.getElementById('unit-toggle');
-            
-            // --- Global State ---
-            let currentUnit = 'metric'; // Default unit system
-            
-            // --- Conversion Constants ---
-            const CM_TO_INCH = 1 / 2.54;
-            const KG_TO_LBS = 2.20462;
+            const themeToggle = document.getElementById('theme-toggle');
+            const themeStatus = document.getElementById('theme-status');
+            const body = document.body;
 
-            // --- Input Elements (using same IDs for all units) ---
-            const inputElements = {
-                weight_kg: document.getElementById('weight_kg'),
-                height_cm: document.getElementById('height_cm'),
-                neck_cm: document.getElementById('neck_cm'),
-                waist_cm: document.getElementById('waist_cm'),
-                hip_cm: document.getElementById('hip_cm')
-            };
-            
-            // --- Unit Data Mapping for UI Updates ---
-            const unitData = {
-                metric: {
-                    weight_kg: { label: 'Weight (kg)', placeholder: 'e.g. 80.5 kg', min: 30, max: 300, step: 0.1, precision: 1 },
-                    height_cm: { label: 'Height (cm)', placeholder: 'e.g. 180 cm', min: 100, max: 250, step: 0.1, precision: 1 },
-                    neck_cm: { label: 'Neck Circumference (cm)', placeholder: 'e.g. 40.0 cm', min: 20, max: 70, step: 0.1, precision: 1 },
-                    waist_cm: { label: 'Waist Circumference (cm)', placeholder: 'e.g. 90.0 cm', min: 50, max: 150, step: 0.1, precision: 1 },
-                    hip_cm: { label: 'Hip Circumference (cm) - Women Only', placeholder: 'e.g. 100.0 cm', min: 60, max: 160, step: 0.1, precision: 1 }
+            const modalOverlay = document.getElementById('modal-overlay');
+            const modalTitle = document.getElementById('modal-title');
+            const modalText = document.getElementById('modal-text');
+            const closeModal = document.getElementById('close-modal');
+            const modalConfirm = document.getElementById('modal-confirm');
+            const infoBtns = document.querySelectorAll('.info-btn');
+
+            const modalContent = {
+                neck: {
+                    title: "Neck Measurement",
+                    text: "Stand upright with your head facing forward. Place the tape measure just below the larynx (Adam's apple), ensuring the tape is level. Do not pull the tape tight; allow it to rest gently on the skin. Take the measurement on a normal exhale."
                 },
-                imperial: {
-                    weight_kg: { label: 'Weight (lbs)', placeholder: 'e.g. 177 lbs', min: 66, max: 660, step: 0.1, precision: 1 },
-                    height_cm: { label: 'Height (in)', placeholder: 'e.g. 71.0 inches', min: 39, max: 98, step: 0.1, precision: 1 },
-                    neck_cm: { label: 'Neck Circumference (in)', placeholder: 'e.g. 15.7 inches', min: 7.8, max: 27.5, step: 0.1, precision: 1 },
-                    waist_cm: { label: 'Waist Circumference (in)', placeholder: 'e.g. 35.4 inches', min: 19.6, max: 59, step: 0.1, precision: 1 },
-                    hip_cm: { label: 'Hip Circumference (in) - Women Only', placeholder: 'e.g. 39.4 inches', min: 23.6, max: 63, step: 0.1, precision: 1 }
+                waist: {
+                    title: "Waist Measurement",
+                    text: "For men and women, measure horizontally around the abdomen at the level of the navel (belly button). Ensure the tape measure is level all the way around the body. Take the measurement on a normal exhale."
+                },
+                hip: {
+                    title: "Hip Measurement",
+                    text: "This measurement is only required for females. Measure horizontally around the widest part of the hips/buttocks. Ensure the tape measure is level."
                 }
             };
+
+            const openInfoModal = (type) => {
+                const info = modalContent[type];
+                modalTitle.textContent = info.title;
+                modalText.textContent = info.text;
+                modalOverlay.classList.remove('hidden');
+                setTimeout(() => {
+                    modalOverlay.classList.add('active');
+                    modalOverlay.style.opacity = '1';
+                }, 10);
+            };
+
+            const closeInfoModal = () => {
+                modalOverlay.classList.remove('active');
+                modalOverlay.style.opacity = '0';
+                setTimeout(() => {
+                    modalOverlay.classList.add('hidden');
+                }, 300);
+            };
+
+            infoBtns.forEach(btn => btn.addEventListener('click', () => openInfoModal(btn.dataset.modal)));
+            closeModal.addEventListener('click', closeInfoModal);
+            modalConfirm.addEventListener('click', closeInfoModal);
+            modalOverlay.addEventListener('click', (e) => { if (e.target === modalOverlay) closeInfoModal(); });
+
+            const KG_TO_LBS = 2.20462;
+            const CM_TO_IN = 0.393701;
+
+            const btnMetric = document.getElementById('btn-metric');
+            const btnImperial = document.getElementById('btn-imperial');
+            const metricHeightBox = document.getElementById('metric-height-box');
+            const imperialHeightBox = document.getElementById('imperial-height-box');
             
-            /**
-             * Converts a value from one unit to another (used for preserving input fields when switching units).
-             */
-            function convertValue(value, fromUnit, toUnit, key) {
-                if (value === '' || isNaN(value)) return '';
-                const val = parseFloat(value);
-                
-                if (fromUnit === toUnit) return val.toFixed(unitData[toUnit][key].precision);
+            const labelWeight = document.getElementById('label-weight');
+            const labelHeight = document.getElementById('label-height');
+            const labelNeck = document.getElementById('label-neck');
+            const labelWaist = document.getElementById('label-waist');
+            const labelHip = document.getElementById('label-hip');
 
-                if (key === 'weight_kg') {
-                    // Weight: KG <-> LBS
-                    return toUnit === 'metric' ? (val / KG_TO_LBS).toFixed(1) : (val * KG_TO_LBS).toFixed(1);
-                } else {
-                    // Circumference/Height: CM <-> Inches
-                    return toUnit === 'metric' ? (val / CM_TO_INCH).toFixed(1) : (val * CM_TO_INCH).toFixed(1);
+            const inputWeight = document.getElementById('weight');
+            const inputHeightCm = document.getElementById('height_cm');
+            const inputHeightFt = document.getElementById('height_ft');
+            const inputHeightIn = document.getElementById('height_in');
+            const inputNeck = document.getElementById('neck');
+            const inputWaist = document.getElementById('waist');
+            const inputHip = document.getElementById('hip');
+
+            let currentUnit = 'metric';
+
+            const convertInputs = (toUnit) => {
+                if (inputWeight.value) {
+                    const weight = parseFloat(inputWeight.value);
+                    inputWeight.value = toUnit === 'imperial' ? (weight * KG_TO_LBS).toFixed(1) : (weight / KG_TO_LBS).toFixed(1);
                 }
-            }
-
-
-            /**
-             * Updates the UI elements (labels, placeholders, min/max) based on the current unit system.
-             */
-            function switchUnits(newUnit) {
-                if (newUnit === currentUnit) return;
-
-                const oldUnit = currentUnit;
-                currentUnit = newUnit;
-
-                // 1. Update Toggle Buttons Styling
-                document.querySelectorAll('.unit-btn').forEach(btn => {
-                    if (btn.dataset.unit === newUnit) {
-                        btn.classList.add('bg-white', 'text-black');
-                        btn.classList.remove('bg-transparent', 'text-gray-400');
-                    } else {
-                        btn.classList.remove('bg-white', 'text-black');
-                        btn.classList.add('bg-transparent', 'text-gray-400');
+                if (toUnit === 'imperial') {
+                    if (inputHeightCm.value) {
+                        const totalInches = parseFloat(inputHeightCm.value) * CM_TO_IN;
+                        inputHeightFt.value = Math.floor(totalInches / 12);
+                        inputHeightIn.value = (totalInches % 12).toFixed(1);
+                    }
+                } else {
+                    if (inputHeightFt.value || inputHeightIn.value) {
+                        const totalInches = (parseFloat(inputHeightFt.value || 0) * 12) + parseFloat(inputHeightIn.value || 0);
+                        inputHeightCm.value = (totalInches / CM_TO_IN).toFixed(1);
+                    }
+                }
+                [inputNeck, inputWaist, inputHip].forEach(inp => {
+                    if (inp.value) {
+                        const val = parseFloat(inp.value);
+                        inp.value = toUnit === 'imperial' ? (val * CM_TO_IN).toFixed(1) : (val / CM_TO_IN).toFixed(1);
                     }
                 });
-                
-                // 2. Update Input Fields
-                for (const key in inputElements) {
-                    const el = inputElements[key];
-                    const data = unitData[newUnit][key];
-                    const labelEl = document.getElementById(`label-${key}`);
-                    
-                    // Convert and update the value
-                    if (el.value) {
-                        el.value = convertValue(el.value, oldUnit, newUnit, key);
-                    }
+            };
 
-                    // Update UI attributes
-                    if (labelEl) labelEl.textContent = data.label;
-                    el.placeholder = data.placeholder;
-                    el.min = data.min;
-                    el.max = data.max;
-                    el.step = data.step;
+            const updateUnits = (unit) => {
+                if (currentUnit === unit) return;
+                convertInputs(unit);
+                currentUnit = unit;
+                if (unit === 'metric') {
+                    btnMetric.classList.replace('unit-btn-inactive', 'unit-btn-active');
+                    btnImperial.classList.replace('unit-btn-active', 'unit-btn-inactive');
+                    metricHeightBox.classList.remove('hidden');
+                    imperialHeightBox.classList.add('hidden');
+                    labelWeight.textContent = 'Weight (kg)'; labelHeight.textContent = 'Height (cm)';
+                    labelNeck.textContent = 'Neck (cm)'; labelWaist.textContent = 'Waist (cm)'; labelHip.textContent = 'Hips (cm)';
+                    inputHeightCm.required = true;
+                } else {
+                    btnImperial.classList.replace('unit-btn-inactive', 'unit-btn-active');
+                    btnMetric.classList.replace('unit-btn-active', 'unit-btn-inactive');
+                    metricHeightBox.classList.add('hidden');
+                    imperialHeightBox.classList.remove('hidden');
+                    labelWeight.textContent = 'Weight (lbs)'; labelHeight.textContent = 'Height (ft/in)';
+                    labelNeck.textContent = 'Neck (in)'; labelWaist.textContent = 'Waist (in)'; labelHip.textContent = 'Hips (in)';
+                    inputHeightCm.required = false;
                 }
-                
-                // 3. Hide results/error on unit switch
-                resultsDiv.classList.add('hidden');
-                errorDiv.classList.add('hidden');
-            }
-            
-            // --- Unit Toggle Event Listener ---
-            unitToggle.addEventListener('click', (e) => {
-                if (e.target.classList.contains('unit-btn')) {
-                    switchUnits(e.target.dataset.unit);
-                }
+            };
+
+            btnMetric.addEventListener('click', () => updateUnits('metric'));
+            btnImperial.addEventListener('click', () => updateUnits('imperial'));
+
+            themeToggle.addEventListener('click', () => {
+                const nextTheme = body.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
+                body.setAttribute('data-theme', nextTheme);
+                themeStatus.textContent = nextTheme === 'light' ? 'Light Mode' : 'Dark Mode';
             });
 
-
-            /**
-             * Shows a temporary, non-blocking notification message.
-             */
-            function showNotification(message, type) {
-                const baseClasses = 'text-center p-3 mt-4 text-sm font-medium rounded-lg transition-opacity duration-300';
-                let typeClasses = type === 'error' ? 'text-red-400 bg-red-900/20 border border-red-800' : 'text-green-400 bg-green-900/20 border border-green-800';
-
-                errorDiv.className = baseClasses + ' ' + typeClasses;
-                errorDiv.textContent = message;
-                errorDiv.classList.remove('hidden');
-                
-                setTimeout(() => {
-                    errorDiv.classList.add('hidden');
-                }, 5000);
-            }
-
-            /**
-             * Handles opening and closing for all modals.
-             */
-            function setupModal(infoBtnId, modalId, closeBtnId, backdropId) {
-                const infoBtn = document.getElementById(infoBtnId);
-                const modal = document.getElementById(modalId);
-                const closeBtn = document.getElementById(closeBtnId);
-                const backdrop = document.getElementById(backdropId);
-
-                const showModal = () => modal.classList.remove('hidden');
-                const hideModal = () => modal.classList.add('hidden');
-
-                if (infoBtn) infoBtn.addEventListener('click', showModal);
-                if (closeBtn) closeBtn.addEventListener('click', hideModal);
-                if (backdrop) backdrop.addEventListener('click', hideModal);
-            }
-            
-            // --- Modal Setup ---
-            setupModal('info-neck-btn', 'neck-info-modal', 'modal-close-neck-btn', 'modal-backdrop-neck');
-            setupModal('info-waist-btn', 'waist-info-modal', 'modal-close-waist-btn', 'modal-backdrop-waist');
-            setupModal('info-hip-btn', 'hip-info-modal', 'modal-close-hip-btn', 'modal-backdrop-hip');
-            
-            /**
-             * Updates required attribute and visibility for hip input based on gender.
-             */
-            function updateGenderUI() {
+            genderSelect.addEventListener('change', () => {
                 const isFemale = genderSelect.value === 'female';
-                
-                // Hide error and results on unit/gender change
-                errorDiv.classList.add('hidden');
-                resultsDiv.classList.add('hidden');
+                hipInputContainer.classList.toggle('active', isFemale);
+                inputHip.required = isFemale;
+            });
 
-                if (isFemale) {
-                    hipInputContainer.classList.add('active'); // Show hip container
-                    inputElements.hip_cm.required = true;
-                } else {
-                    hipInputContainer.classList.remove('active'); // Hide hip container
-                    inputElements.hip_cm.required = false;
-                    inputElements.hip_cm.value = ''; // Clear hip input values when hidden
-                }
+            function generateInterpretation(gender, bf, category) {
+                let text = `Your estimated body fat percentage of <strong>${bf.toFixed(1)}%</strong> places you in the <strong>${category}</strong> category for ${gender === 'male' ? 'men' : 'women'}. `;
+                const map = {
+                    "Essential Fat": "This represents the minimum fat required for physiological function. Maintaining this level is extremely challenging and may not be sustainable long-term.",
+                    "Athletic": "This is a typical range for high-level athletes focused on performance and low body weight. It generally reflects high lean mass and excellent conditioning.",
+                    "Fitness": "This range is associated with general fitness, often reflecting a balanced diet and regular exercise routine. It is a healthy and sustainable target for most active individuals.",
+                    "Acceptable": "This is a healthy and acceptable range for the general population. Goals focused on muscle gain or improved aesthetics might target the 'Fitness' or 'Athletic' range.",
+                    "High/Obese": "This range may be associated with increased health risks, including cardiovascular issues. It is highly recommended to consult a healthcare professional for guidance on safe and healthy weight management strategies."
+                };
+                return text + (map[category] || "");
             }
 
-            genderSelect.addEventListener('change', updateGenderUI);
-            
-            // Initial load setup: Apply initial metric state
-            switchUnits('metric'); 
-            updateGenderUI(); 
-
-            /**
-             * Determines the simplified body fat category based on gender and BF%.
-             */
-            function getTraditionalCategory(gender, bfPercentage) {
-                if (gender === 'male') {
-                    if (bfPercentage < 6) return 'Essential Fat';
-                    if (bfPercentage <= 13) return 'Athletic';
-                    if (bfPercentage <= 17) return 'Fitness';
-                    if (bfPercentage <= 24) return 'Acceptable';
-                    return 'High/Obese';
-                } else { // Female
-                    if (bfPercentage < 14) return 'Essential Fat';
-                    if (bfPercentage <= 20) return 'Athletic';
-                    if (bfPercentage <= 24) return 'Fitness';
-                    if (bfPercentage <= 31) return 'Acceptable';
-                    return 'High/Obese';
-                }
-            }
-            
-            /**
-             * Generates an interpretation text based on gender and BF category.
-             * @param {string} gender 'male' or 'female'
-             * @param {number} bfPercentage Calculated Body Fat Percentage
-             * @param {string} category The derived category string
-             * @returns {string} HTML string with interpretation
-             */
-            function generateInterpretation(gender, bfPercentage, category) {
-                let interpretation = `Your estimated body fat percentage of **${bfPercentage.toFixed(1)}%** places you in the **${category}** category for ${gender === 'male' ? 'men' : 'women'}.`;
-                
-                // Simple interpretations based on category
-                if (category === 'Essential Fat') {
-                    interpretation += ` This represents the minimum fat required for physiological function. Maintaining this level is extremely challenging and may not be sustainable long-term.`;
-                } else if (category === 'Athletic') {
-                    interpretation += ` This is a typical range for high-level athletes focused on performance and low body weight. It generally reflects high lean mass and excellent conditioning.`;
-                } else if (category === 'Fitness') {
-                    interpretation += ` This range is associated with general fitness, often reflecting a balanced diet and regular exercise routine. It is a healthy and sustainable target for most active individuals.`;
-                } else if (category === 'Acceptable') {
-                    interpretation += ` This is a healthy and acceptable range for the general population. Goals focused on muscle gain or improved aesthetics might target the 'Fitness' or 'Athletic' range.`;
-                } else if (category === 'High/Obese') {
-                    interpretation += ` This range may be associated with increased health risks, including cardiovascular issues. It is highly recommended to consult a healthcare professional for guidance on safe and healthy weight management strategies.`;
-                }
-                
-                // Use strong tags for visual emphasis
-                return interpretation.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-            }
-            
-            /**
-             * Generates HTML list items with simple guidance based on the BF category.
-             * @param {string} category The derived BF category string
-             * @returns {string} HTML string of <li> elements
-             */
             function generateGuidance(category) {
-                let guidanceItems = [];
+                let items = [
+                    "Regularly monitor your measurements (e.g., every 1-4 weeks) at the same time and conditions to track long-term trends accurately.",
+                    "Focus on a balanced diet rich in whole foods, lean protein, and fiber for satiety and muscle maintenance.",
+                    "Ensure adequate sleep (7-9 hours) as it significantly impacts hormones related to recovery and fat storage."
+                ];
 
-                // Common Guidance - MODIFIED FOR FLEXIBILITY
-                guidanceItems.push('Regularly monitor your measurements (e.g., every 1-4 weeks) at the same time and conditions to track long-term trends accurately.');
-                guidanceItems.push('Focus on a balanced diet rich in whole foods, lean protein, and fiber for satiety and muscle maintenance.');
-                guidanceItems.push('Ensure adequate sleep (7-9 hours) as it significantly impacts hormones related to recovery and fat storage.');
-
-                // Category Specific Guidance - MODIFIED GOALS
                 if (category === 'Essential Fat') {
-                    guidanceItems.push('<strong>Goal: Maintenance/Small Increase.</strong> As this is the minimum physiological fat level, focus on nutrient-dense food and potentially a small, controlled increase in body fat for long-term health and hormonal balance.');
-                    guidanceItems.push('Ensure sufficient caloric intake to match your high activity level and fuel training.');
-
+                    items.push("<strong>Goal: Maintenance/Small Increase.</strong> As this is the minimum physiological fat level, focus on nutrient-dense food and potentially a small, controlled increase in body fat for long-term health and hormonal balance.");
+                    items.push("Ensure sufficient caloric intake to match your high activity level and fuel training.");
                 } else if (category === 'Athletic') {
-                    guidanceItems.push('<strong>Goal: Maintenance/Performance Improvement.</strong> Focus on optimizing training-specific nutrition (timing protein/carbs) to maintain low body fat while maximizing lean mass and recovery.');
-                    guidanceItems.push('Prioritize post-workout nutrition (protein and carbs) to optimize muscle recovery and growth.');
-
+                    items.push("<strong>Goal: Maintenance/Performance Improvement.</strong> Focus on optimizing training-specific nutrition (timing protein/carbs) to maintain low body fat while maximizing lean mass and recovery.");
+                    items.push("Prioritize post-workout nutrition (protein and carbs) to optimize muscle recovery and growth.");
                 } else if (category === 'Fitness' || category === 'Acceptable') {
-                    guidanceItems.push('<strong>Goal: Maintenance/Improvement.</strong> If aiming for a lower body fat percentage, focus on a sustainable, small caloric deficit alongside robust training.');
-                    // MODIFIED LINE: Changed 3-4 sessions to 2-4 sessions.
-                    guidanceItems.push('Incorporate resistance training 2-4 times per week to preserve and build Lean Body Mass, which boosts metabolism.');
-                    guidanceItems.push('If maintaining, ensure energy intake matches output and prioritize high protein intake to support existing muscle mass.');
-
+                    items.push("<strong>Goal: Maintenance/Improvement.</strong> If aiming for a lower body fat percentage, focus on a sustainable, small caloric deficit alongside robust training.");
+                    items.push("Incorporate resistance training 2-4 times per week to preserve and build Lean Body Mass, which boosts metabolism.");
+                    items.push("If maintaining, ensure energy intake matches output and prioritize high protein intake to support existing muscle mass.");
                 } else if (category === 'High/Obese') {
-                    guidanceItems.push('<strong>Goal: Sustainable Reduction.</strong> Focus on creating a small, consistent caloric deficit (250-500 kcal daily) for gradual, healthy body fat loss.');
-                    // MODIFIED: Resistance training recommendation for high/obese category to include beginner focus, compound movements, and safety.
-                    guidanceItems.push('<strong>Resistance Training Focus (1-3x/week):</strong> Start with beginner-friendly sessions focused on <strong>full-body compound movements</strong> (like squats, presses, and rows). Prioritize <strong>correct, safe form</strong> and moderate weight/volume to build a solid foundation before increasing intensity.');
-                    // MODIFIED LINE: Changed "Start with low-impact activity..." to "Include low impact activity..."
-                    guidanceItems.push('Include low-impact physical activity (e.g., daily walking) and gradually increase intensity and duration.');
-                    // MODIFICATION APPLIED HERE: Changed 'Consult a Physician or Registered Dietitian' to 'Consult with a professional'
-                    guidanceItems.push('<strong>Consult with a professional</strong> for a safe, personalized weight management plan, especially if you have health concerns.');
+                    items.push("<strong>Goal: Sustainable Reduction.</strong> Focus on creating a small, consistent caloric deficit (250-500 kcal daily) for gradual, healthy body fat loss.");
+                    items.push("<strong>Resistance Training Focus (1-3x/week):</strong> Start with beginner-friendly sessions focused on <strong>full-body compound movements</strong>. Prioritize <strong>correct, safe form</strong> and moderate weight/volume.");
+                    items.push("Include low-impact physical activity (e.g., daily walking) and gradually increase intensity and duration.");
+                    items.push("<strong>Consult with a professional</strong> for a safe, personalized weight management plan, especially if you have health concerns.");
                 }
-
-                return guidanceItems.map(item => `<li>${item.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')}</li>`).join('');
+                return items.map(item => `<li>${item}</li>`).join('');
             }
 
-
-            // --- Core Calculation Logic ---
-
-            form.addEventListener('submit', function(e) {
-                e.preventDefault(); 
-                errorDiv.classList.add('hidden'); 
-                resultsDiv.classList.add('hidden'); 
-                
-                const gender = genderSelect.value;
-                if (!gender) {
-                    showNotification('Please select a gender.', 'error');
-                    return;
-                }
-
-                // --- 1. Gather Input and Prepare for Calculation (Convert to Imperial Units) ---
-                
-                const rawWeight = parseFloat(inputElements.weight_kg.value); 
-                const rawHeight = parseFloat(inputElements.height_cm.value);
-                const rawNeck = parseFloat(inputElements.neck_cm.value);
-                const rawWaist = parseFloat(inputElements.waist_cm.value);
-                let rawHip = gender === 'female' ? parseFloat(inputElements.hip_cm.value) : 0; 
-                
-                // --- 2. Input Validation ---
-                if (isNaN(rawWeight) || isNaN(rawHeight) || isNaN(rawNeck) || isNaN(rawWaist) || 
-                    rawWeight <= 0 || rawHeight <= 0 || rawNeck <= 0 || rawWaist <= 0) 
-                {
-                    showNotification('Please fill out all required fields with valid positive numbers.', 'error');
-                    return;
-                }
-                if (gender === 'female' && (isNaN(rawHip) || rawHip <= 0)) {
-                    showNotification('Please enter a valid Hip Circumference for females.', 'error');
-                    return;
-                }
-
-                let weightKg, weightLbs, heightInches, neckInches, waistInches, hipInches;
-                
+            form.addEventListener('submit', (e) => {
+                e.preventDefault();
+                let neckIn, waistIn, heightIn, hipIn, weightVal;
                 if (currentUnit === 'metric') {
-                    // Metric Inputs (CM/KG)
-                    weightKg = rawWeight;
-                    weightLbs = weightKg * KG_TO_LBS;
-                    
-                    heightInches = rawHeight * CM_TO_INCH;
-                    neckInches = rawNeck * CM_TO_INCH;
-                    waistInches = rawWaist * CM_TO_INCH;
-                    hipInches = rawHip * CM_TO_INCH;
+                    neckIn = parseFloat(inputNeck.value) * CM_TO_IN;
+                    waistIn = parseFloat(inputWaist.value) * CM_TO_IN;
+                    heightIn = parseFloat(inputHeightCm.value) * CM_TO_IN;
+                    hipIn = parseFloat(inputHip.value || 0) * CM_TO_IN;
+                    weightVal = parseFloat(inputWeight.value);
                 } else {
-                    // Imperial Inputs (LBS/Inches)
-                    weightLbs = rawWeight;
-                    weightKg = weightLbs / KG_TO_LBS;
-                    
-                    heightInches = rawHeight;
-                    neckInches = rawNeck;
-                    waistInches = rawWaist;
-                    hipInches = rawHip;
+                    neckIn = parseFloat(inputNeck.value); waistIn = parseFloat(inputWaist.value);
+                    heightIn = (parseFloat(inputHeightFt.value || 0) * 12) + parseFloat(inputHeightIn.value || 0);
+                    hipIn = parseFloat(inputHip.value || 0); weightVal = parseFloat(inputWeight.value);
                 }
-
-
-                // --- 3. Calculate Body Fat Percentage (BF%) - Formula uses Imperial Inches ---
+                if (isNaN(neckIn) || isNaN(waistIn) || isNaN(heightIn)) return;
+                const gender = genderSelect.value;
+                let bf = (gender === 'male') ? 86.010 * Math.log10(waistIn - neckIn) - 70.041 * Math.log10(heightIn) + 36.76 
+                                            : 163.205 * Math.log10(waistIn + hipIn - neckIn) - 97.684 * Math.log10(heightIn) - 78.387;
+                bf = Math.max(5, Math.min(bf, 50));
+                document.getElementById('bf-percentage').textContent = bf.toFixed(1) + '%';
                 
-                let bfPercentage = 0;
-                
+                let category = "Acceptable";
                 if (gender === 'male') {
-                    // Note: Math.log10 will throw an error if (waistInches - neckInches) <= 0
-                    const measurementDifference = waistInches - neckInches;
-                    if (measurementDifference <= 0) {
-                        console.warn("Waist <= Neck, result will be inaccurate and clamped.");
-                    }
-                    // Male Formula (Inputs in Inches)
-                    bfPercentage = 86.010 * Math.log10(measurementDifference) - 70.041 * Math.log10(heightInches) + 36.76;
-
-                } else if (gender === 'female') {
-                    const measurementSum = waistInches + hipInches - neckInches;
-                    if (measurementSum <= 0) {
-                        showNotification('Waist + Hip circumference must be greater than neck circumference for a valid female calculation.', 'error');
-                        return;
-                    }
-                    // Female Formula (Inputs in Inches)
-                    bfPercentage = 163.205 * Math.log10(measurementSum) - 97.684 * Math.log10(heightInches) - 78.387;
-                }
-                
-                // If the calculation results in NaN (e.g., log of a non-positive number), set to a high value for clamping
-                if (isNaN(bfPercentage) || bfPercentage < 0) {
-                    bfPercentage = 50; 
+                    if (bf < 6) category = 'Essential Fat';
+                    else if (bf <= 13) category = 'Athletic';
+                    else if (bf <= 17) category = 'Fitness';
+                    else if (bf <= 24) category = 'Acceptable';
+                    else category = 'High/Obese';
+                } else {
+                    if (bf < 14) category = 'Essential Fat';
+                    else if (bf <= 20) category = 'Athletic';
+                    else if (bf <= 24) category = 'Fitness';
+                    else if (bf <= 31) category = 'Acceptable';
+                    else category = 'High/Obese';
                 }
 
-                // Clamp BF% between 5% and 50% for realistic output
-                bfPercentage = Math.max(5, Math.min(50, bfPercentage));
-
-                // --- 4. Calculate Fat Mass (FM) and Lean Body Mass (LBM) ---
-                
-                const bfRatio = bfPercentage / 100;
-                const fatMassKg = weightKg * bfRatio;
-                const leanMassKg = weightKg - fatMassKg;
-
-                // Determine final display values based on currentUnit
+                const fatMass = weightVal * (bf / 100);
+                const leanMass = weightVal - fatMass;
                 const unitLabel = currentUnit === 'metric' ? 'kg' : 'lbs';
-                const fatMassDisplay = currentUnit === 'metric' ? fatMassKg : fatMassKg * KG_TO_LBS;
-                const leanMassDisplay = currentUnit === 'metric' ? leanMassKg : leanMassKg * KG_TO_LBS;
-                
-                // --- 5. Display Results ---
-                const bfFormatted = bfPercentage.toFixed(1);
-                const fmFormatted = fatMassDisplay.toFixed(1);
-                const lbmFormatted = leanMassDisplay.toFixed(1);
-
-                const traditionalCategory = getTraditionalCategory(gender, bfPercentage);
-
-                // Update results elements
-                document.getElementById('bf-percentage').textContent = `${bfFormatted}%`; 
-                document.getElementById('bf-traditional-category').textContent = traditionalCategory;
-                document.getElementById('fat-mass').textContent = `${fmFormatted} ${unitLabel}`;
-                document.getElementById('lean-mass').textContent = `${lbmFormatted} ${unitLabel}`;
-                
-                // Update Interpretation section
-                const interpretationText = generateInterpretation(gender, bfPercentage, traditionalCategory);
-                document.getElementById('result-interpretation').innerHTML = interpretationText;
-                
-                // Update Guidance section (NEW)
-                const guidanceHtml = generateGuidance(traditionalCategory);
-                document.getElementById('guidance-list').innerHTML = guidanceHtml;
-
+                document.getElementById('fat-mass-display').textContent = `${fatMass.toFixed(1)} ${unitLabel}`;
+                document.getElementById('lean-mass-display').textContent = `${leanMass.toFixed(1)} ${unitLabel}`;
+                document.getElementById('bf-traditional-category').textContent = category;
+                document.getElementById('result-interpretation-combined').innerHTML = generateInterpretation(gender, bf, category);
+                document.getElementById('guidance-list').innerHTML = generateGuidance(category);
                 resultsDiv.classList.remove('hidden');
-                
-                // Store results (as general data)
-                resultsDiv.dataset.bf = bfFormatted;
-                resultsDiv.dataset.fm = fmFormatted;
-                resultsDiv.dataset.lbm = lbmFormatted;
-                resultsDiv.dataset.unit = unitLabel;
-
-                // Scroll to results for better mobile UX
                 resultsDiv.scrollIntoView({ behavior: 'smooth', block: 'start' });
             });
-
-
-            // --- Reset Function ---
-
-            /**
-             * Resets the entire calculator form and hides results.
-             */
-            function resetCalculator() {
-                form.reset();
-                resultsDiv.classList.add('hidden');
-                errorDiv.classList.add('hidden');
-                
-                // Reset gender-dependent UI
-                updateGenderUI(); 
-                showNotification('Calculator reset successfully.', 'success');
-                // Scroll back to the top of the form
-                document.body.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            }
-
-            // Attach event listener for reset button
-            document.getElementById('reset-btn').addEventListener('click', resetCalculator);
+            
+            document.getElementById('reset-btn').onclick = () => {
+                form.reset(); resultsDiv.classList.add('hidden');
+                hipInputContainer.classList.remove('active');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            };
         });
     </script>
 </body>
